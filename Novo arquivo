@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+            margin-bottom: 20px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+        }
+        .card.flipped {
+            background-color: #2ecc71;
+        }
+        .controls {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Pontos: 0</div>
+    <div class="game-container" id="gameBoard"></div>
+    <div class="controls">
+        <button onclick="restartGame()">Reiniciar</button>
+    </div>
+
+    <script>
+        let emojis = ['zaquel', 'zaquel', 'marcos', 'marcos', 'samuel', 'samuel', 'adao', 'adao', 'davi', 'davi', 'pedro', 'pedro', 'jesus', 'jesus', 'mateus', 'mateus'];
+        let shuffledEmojis;
+        let selectedCards = [];
+        let matchedPairs = 0;
+        let score = 0;
+        const gameBoard = document.getElementById('gameBoard');
+        const scoreDisplay = document.getElementById('score');
+
+        function shuffleAndCreateBoard() {
+            gameBoard.innerHTML = '';
+            shuffledEmojis = [...emojis].sort(() => 0.5 - Math.random());
+            shuffledEmojis.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.emoji = emoji;
+                card.dataset.index = index;
+                card.addEventListener('click', flipCard);
+                gameBoard.appendChild(card);
+            });
+            matchedPairs = 0;
+            score = 0;
+            updateScore();
+        }
+
+        function flipCard() {
+            if (selectedCards.length < 2 && !this.classList.contains('flipped')) {
+                this.textContent = this.dataset.emoji;
+                this.classList.add('flipped');
+                selectedCards.push(this);
+            }
+            
+            if (selectedCards.length === 2) {
+                setTimeout(checkMatch, 500);
+            }
+        }
+
+        function checkMatch() {
+            if (selectedCards[0].dataset.emoji === selectedCards[1].dataset.emoji) {
+                selectedCards.forEach(card => card.style.pointerEvents = 'none');
+                matchedPairs++;
+                score += 10;
+                if (matchedPairs === emojis.length / 2) {
+                    setTimeout(() => alert('Parabéns! Você venceu! 🎉'), 300);
+                }
+            } else {
+                selectedCards.forEach(card => {
+                    card.textContent = '';
+                    card.classList.remove('flipped');
+                });
+                score = Math.max(0, score - 5);
+            }
+            selectedCards = [];
+            updateScore();
+        }
+
+        function updateScore() {
+            scoreDisplay.textContent = `Pontos: ${score}`;
+        }
+
+        function restartGame() {
+            shuffleAndCreateBoard();
+        }
+
+        shuffleAndCreateBoard();
+    </script>
+</body>
+</html>
